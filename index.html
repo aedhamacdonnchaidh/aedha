@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aedha</title>
+    <style>
+        /* Base page theme settings */
+        body {
+            background-color: #000000; 
+            color: #ffffff;            
+            font-family: sans-serif;
+            text-align: center;
+            padding: 40px 20px;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        /* --- Full-Screen Background Asset Wrappers --- */
+        .bg-video-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -2; /* Pushed furthest back into stack layers */
+            overflow: hidden;
+        }
+
+        .loop-animation-asset {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; 
+        }
+
+        /* FIXED: Added full-screen structural properties for the target replacement image */
+        .bg-image-replacement {
+            display: none; /* Kept completely turned off until script activates it */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover;
+            z-index: -1; /* Placed immediately over the hidden video window */
+        }
+
+        /* 3-Question Quiz Container Styling */
+        .puzzle-box {
+            position: relative;
+            z-index: 2; 
+            max-width: 480px;
+            margin: 40px auto 30px auto;
+            padding: 25px;
+            border: 2px solid #ffffff; 
+            background-color: rgba(17, 17, 17, 0.85); 
+        }
+
+        .puzzle-stage {
+            display: none; 
+        }
+
+        .puzzle-title {
+            font-weight: bold;
+            font-size: 18px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        /* Button Action Styling */
+        .option-button {
+            display: block;
+            width: 100%;
+            max-width: 260px;
+            margin: 10px auto;
+            padding: 12px;
+            background-color: #ffffff; 
+            color: #000000;
+            border: 1px solid #ffffff;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .option-button:hover {
+            background-color: #000000;
+            color: #ffffff;
+        }
+
+        /* Interactive Hotspot Cover Layer */
+        .hidden-hotspot-link {
+            display: none; 
+            position: fixed; 
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: transparent;
+            cursor: crosshair;
+            z-index: 1; 
+        }
+
+        /* Shaking Feedback Error Mechanics */
+        .shake-sequence {
+            animation: shakeFrames 0.3s ease-in-out;
+        }
+
+        @keyframes shakeFrames {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px); }
+            40%, 80% { transform: translateX(10px); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- AUDIO SETUP OPTION -->
+    <audio id="successAudio" src="fate.mp3"></audio>
+
+    <!-- 1. FULL-SCREEN BACKGROUND VIDEO LAYER CONTAINER -->
+    <div class="bg-video-container" id="videoBackground">
+        <video autoplay loop muted playsinline class="loop-animation-asset">
+            <source src="0001-0120.mp4" type="video/mp4">
+            Media element playback failed to launch.
+        </video>
+    </div>
+
+    <!-- FIXED OPTION: Change 'your_new_image.jpg' below to your actual custom image path filename -->
+    <img src="freed.jpg" alt="Revelation" class="bg-image-replacement" id="imageBackground">
+
+    <!-- 2. THE 3-STAGE PROGRESSION QUIZ BOX -->
+    <div class="puzzle-box" id="quizContainer">
+        
+        <!-- Stage One Panel -->
+        <div class="puzzle-stage" id="gate1" style="display: block;">
+            <div class="puzzle-title">Tpnf usz up ijef, tpnf usz up difbu; cvu ujnf xjmm tipx, xf bmxbzt xjmm nffu.</div>
+            <button class="option-button" onclick="failChoice()">Ifbwfo</button>
+            <button class="option-button" onclick="nextStage(1, 2)">Efbui</button>
+            <button class="option-button" onclick="failChoice()">Uif Tlz</button>
+        </div>
+
+        <!-- Stage Two Panel -->
+        <div class="puzzle-stage" id="gate2">
+            <div class="puzzle-title">J bn nbo’t pmeftu tibepx, zfu J xbml po gpvs mfht jotufbe pg uxp</div>
+            <button class="option-button" onclick="nextStage(2, 3)">Eph</button>
+            <button class="option-button" onclick="failChoice()">B tibepx</button>
+        </div>
+
+        <!-- Stage Three Panel -->
+        <div class="puzzle-stage" id="gate3">
+            <div class="puzzle-title">J tjoh xjuipvu c tjohmf mzsjd. Nz cpoft bsf gjmmfe xjui cjs jotufbe pg nbsspx. J tpbs pwfs uif gpsftu.</div>
+            <button class="option-button" onclick="failChoice()">Xjoe</button>
+            <button class="option-button" onclick="failChoice()">Usfft</button>
+            <button class="option-button" onclick="nextStage(3, 'unlocked')">Cjse</button>
+        </div>
+
+        <!-- Final Resolution Banner -->
+        <div class="puzzle-stage" id="gate-unlocked">
+            <div class="puzzle-title" style="margin: 0; color: #ffffff;">Quest Complete. Aedha has been freed.</div>
+        </div>
+    </div>
+
+    <!-- 3. FULL SCREEN INTERACTION LINK ZONE -->
+    <a href="https://mail.google.com/mail/u/0/?tab=rm&ogbl#inbox?compose=CllgCJvlqGZSXQcVsJHRRLgkqQdKCVfHxqLPbgHddjJxKspqZmCZBNrmpqHDZmVlRxvJtWnBpMg" target="_blank" id="targetHotspot" class="hidden-hotspot-link" title="Click to move forward."></a>
+
+    <!-- 4. RUNTIME APP INTERACTION SCRIPTS -->
+    <script>
+        // Progress control sequencer function
+        function nextStage(activeNum, targetNum) {
+            document.getElementById('gate' + activeNum).style.display = 'none';
+            
+            if (targetNum === 'unlocked') {
+                document.getElementById('gate-unlocked').style.display = 'block';
+                document.getElementById('targetHotspot').style.display = 'block';
+                
+                // FIXED: Hides the default background loop video container
+                document.getElementById('videoBackground').style.display = 'none';
+                // FIXED: Displays the brand new full viewport replacement image layout layer
+                document.getElementById('imageBackground').style.display = 'block';
+                
+                // Automatically triggers the success audio track item instantly upon completion
+                const audio = document.getElementById('successAudio');
+                audio.play().catch(error => {
+                    console.log("Audio autoplay was restricted by the browser window until a user interaction occurred:", error);
+                });
+            } else {
+                document.getElementById('gate' + targetNum).style.display = 'block';
+            }
+        }
+
+        // Standard incorrect user interaction shake routine execution
+        function failChoice() {
+            const layoutBox = document.getElementById('quizContainer');
+            layoutBox.classList.add('shake-sequence');
+            
+            setTimeout(() => {
+                layoutBox.classList.remove('shake-sequence');
+            }, 300);
+        }
+    </script>
+
+</body>
+</html>
