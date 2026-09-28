@@ -23,8 +23,10 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            z-index: -2; /* Pushed furthest back into stack layers */
+            z-index: -2; 
             overflow: hidden;
+            opacity: 1;  
+            transition: opacity 2s ease-in-out;
         }
 
         .loop-animation-asset {
@@ -33,19 +35,19 @@
             object-fit: cover; 
         }
 
-        /* FIXED: Added full-screen structural properties for the target replacement image */
         .bg-image-replacement {
-            display: none; /* Kept completely turned off until script activates it */
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
             object-fit: cover;
-            z-index: -1; /* Placed immediately over the hidden video window */
+            z-index: -1;  
+            opacity: 0;   
+            transition: opacity 2s ease-in-out;
         }
 
-        /* 3-Question Quiz Container Styling */
+        /* Quiz Container Styling */
         .puzzle-box {
             position: relative;
             z-index: 2; 
@@ -54,6 +56,7 @@
             padding: 25px;
             border: 2px solid #ffffff; 
             background-color: rgba(17, 17, 17, 0.85); 
+            transition: opacity 1s ease-in-out;
         }
 
         .puzzle-stage {
@@ -89,17 +92,31 @@
             color: #ffffff;
         }
 
-        /* Interactive Hotspot Cover Layer */
-        .hidden-hotspot-link {
-            display: none; 
-            position: fixed; 
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: transparent;
-            cursor: crosshair;
-            z-index: 1; 
+        /* Direct Input Web Form Box (Appears upon win) */
+        .contact-form-box {
+            display: none;
+            position: relative;
+            z-index: 3;
+            max-width: 400px;
+            margin: 40px auto;
+            padding: 30px;
+            border: 2px dashed #ffffff;
+            background-color: rgba(0, 0, 0, 0.9);
+        }
+
+        .contact-input {
+            width: 80%;
+            padding: 12px;
+            margin: 15px 0;
+            background-color: #111111;
+            border: 1px solid #ffffff;
+            color: #ffffff;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        .contact-input:focus {
+            outline: 2px solid #ffffff;
         }
 
         /* Shaking Feedback Error Mechanics */
@@ -119,7 +136,7 @@
     <!-- AUDIO SETUP OPTION -->
     <audio id="successAudio" src="fate.mp3"></audio>
 
-    <!-- 1. FULL-SCREEN BACKGROUND VIDEO LAYER CONTAINER -->
+    <!-- FULL-SCREEN BACKGROUND VIDEO LAYER CONTAINER -->
     <div class="bg-video-container" id="videoBackground">
         <video autoplay loop muted playsinline class="loop-animation-asset">
             <source src="0001-0120.mp4" type="video/mp4">
@@ -127,12 +144,11 @@
         </video>
     </div>
 
-    <!-- FIXED OPTION: Change 'your_new_image.jpg' below to your actual custom image path filename -->
+    <!-- Replacement Background Image Asset Frame -->
     <img src="freed.jpg" alt="Revelation" class="bg-image-replacement" id="imageBackground">
 
-    <!-- 2. THE 3-STAGE PROGRESSION QUIZ BOX -->
+    <!-- THE 3-STAGE PROGRESSION QUIZ BOX -->
     <div class="puzzle-box" id="quizContainer">
-        
         <!-- Stage One Panel -->
         <div class="puzzle-stage" id="gate1" style="display: block;">
             <div class="puzzle-title">Tpnf usz up ijef, tpnf usz up difbu; cvu ujnf xjmm tipx, xf bmxbzt xjmm nffu.</div>
@@ -162,35 +178,47 @@
         </div>
     </div>
 
-    <!-- 3. FULL SCREEN INTERACTION LINK ZONE -->
-    <a href="https://mail.google.com/mail/u/0/?tab=rm&ogbl#inbox?compose=CllgCJvlqGZSXQcVsJHRRLgkqQdKCVfHxqLPbgHddjJxKspqZmCZBNrmpqHDZmVlRxvJtWnBpMg" target="_blank" id="targetHotspot" class="hidden-hotspot-link" title="Click to move forward."></a>
-
-    <!-- 4. RUNTIME APP INTERACTION SCRIPTS -->
-    <script>
-        // Progress control sequencer function
-        function nextStage(activeNum, targetNum) {
-            document.getElementById('gate' + activeNum).style.display = 'none';
+    <!-- FIXED UNIVERSAL WEB FORM SETUP -->
+    <div class="contact-form-box" id="submissionBox">
+        <div class="puzzle-title">Email me again.</div>
+        
+        <!-- Formspree processing link completely bypasses standard browser/desktop mail handling rules -->
+        <form action="https://formspree.io/f/xbglqoaz" method="POST">
+            <!-- Cryptic hidden baseline parameters to auto-fill custom subject text details inside your inbox dashboard -->
+            <input type="hidden" name="_subject" value="Uif Effs Xbudift">
+            <input type="hidden" name="Message Body" value="Aedha is free.">
             
-            if (targetNum === 'unlocked') {
-                document.getElementById('gate-unlocked').style.display = 'block';
-                document.getElementById('targetHotspot').style.display = 'block';
+            <input type="email" name="email" class="contact-input" placeholder="ENTER YOUR EMAIL ADDRESS" required>
+            <br>
+            <input type="submit" class="option-button" value="SEND TRANSMISSION">
+        </form>
+    </div>
+
+    <!-- RUNTIME APP INTERACTION SCRIPTS -->
+    <script>
+        function nextStage(currentStageNum, nextStageNum) {
+            document.getElementById('gate' + currentStageNum).style.display = 'none';
+            
+            if (nextStageNum === 'unlocked') {
+                document.getElementById('quizContainer').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('quizContainer').style.display = 'none';
+                    document.getElementById('submissionBox').style.display = 'block';
+                }, 1000);
                 
-                // FIXED: Hides the default background loop video container
-                document.getElementById('videoBackground').style.display = 'none';
-                // FIXED: Displays the brand new full viewport replacement image layout layer
-                document.getElementById('imageBackground').style.display = 'block';
+                document.getElementById('videoBackground').style.opacity = '0';
+                document.getElementById('imageBackground').style.opacity = '1';
                 
-                // Automatically triggers the success audio track item instantly upon completion
                 const audio = document.getElementById('successAudio');
                 audio.play().catch(error => {
-                    console.log("Audio autoplay was restricted by the browser window until a user interaction occurred:", error);
+                    console.log("Audio autoplay restriction handled gracefully.", error);
                 });
             } else {
-                document.getElementById('gate' + targetNum).style.display = 'block';
+                document.getElementById('gate' + currentStageNum).style.display = 'none';
+                document.getElementById('gate' + nextStageNum).style.display = 'block';
             }
         }
 
-        // Standard incorrect user interaction shake routine execution
         function failChoice() {
             const layoutBox = document.getElementById('quizContainer');
             layoutBox.classList.add('shake-sequence');
